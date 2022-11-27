@@ -7,6 +7,7 @@ import com.sgolc.graphicsmodel.coordinates.MultiMapper;
 import com.sgolc.graphicsmodel.texture.*;
 import com.sgolc.worldstate.entitycomponent.Component;
 import com.sgolc.worldstate.entitycomponent.ECSystem;
+import com.sgolc.worldstate.entitycomponent.Entity;
 
 import java.awt.*;
 
@@ -37,17 +38,7 @@ public class GradientAndCheckerRenderer extends ECSystem {
         try {
             Texture compositor = new CompositingTexture(
                     entities.stream()
-                            .sorted((e, b) -> {
-                                int first = ((ZIndexComponent)e.components.stream()
-                                        .filter(c -> c instanceof ZIndexComponent)
-                                        .findAny()
-                                        .orElse(new ZIndexComponent(Integer.MIN_VALUE))).zIndex();
-                                int second = ((ZIndexComponent)b.components.stream()
-                                        .filter(c -> c instanceof ZIndexComponent)
-                                        .findAny()
-                                        .orElse(new ZIndexComponent(Integer.MIN_VALUE))).zIndex();
-                                return Integer.compare(first, second);
-                            })
+                            .sorted(this::zIndexComparator)
                             .map(entity -> new MappedTexture(
                             ((TextureComponent) entity.components.stream()
                                     .filter(c -> c instanceof TextureComponent)
@@ -65,5 +56,17 @@ public class GradientAndCheckerRenderer extends ECSystem {
         } catch (ClassCastException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private int zIndexComparator(Entity a, Entity b) {
+        int first = ((ZIndexComponent) a.components.stream()
+                .filter(c -> c instanceof ZIndexComponent)
+                .findAny()
+                .orElse(new ZIndexComponent(Integer.MIN_VALUE))).zIndex();
+        int second = ((ZIndexComponent) b.components.stream()
+                .filter(c -> c instanceof ZIndexComponent)
+                .findAny()
+                .orElse(new ZIndexComponent(Integer.MIN_VALUE))).zIndex();
+        return Integer.compare(first, second);
     }
 }
