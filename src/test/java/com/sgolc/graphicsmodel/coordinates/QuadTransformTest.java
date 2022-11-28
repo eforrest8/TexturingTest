@@ -1,7 +1,5 @@
-package com.sgolc;
+package com.sgolc.graphicsmodel.coordinates;
 
-import com.sgolc.graphicsmodel.coordinates.Point;
-import com.sgolc.graphicsmodel.coordinates.QuadTransform;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
