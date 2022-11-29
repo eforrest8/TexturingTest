@@ -15,5 +15,6 @@ public class TransparentGradientEntity extends ScreenSpaceEntity {
         setTransparency(alpha);
         setTranslate(0.25, 0.25);
         setScale(0.5, 0.5);
+        setRotate(1);
     }
 }

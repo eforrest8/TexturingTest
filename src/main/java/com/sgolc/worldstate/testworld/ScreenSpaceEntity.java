@@ -70,7 +70,7 @@ public class ScreenSpaceEntity extends Entity {
     }
 
     public ScreenSpaceEntity() {
-        this.components.addAll(List.of(translate, scale, rotate, texture, zIndex));
+        this.components.addAll(List.of(translate, scale, texture, zIndex));
     }
 
     private MultiMapper getMultiMapper() {

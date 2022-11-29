@@ -3,33 +3,42 @@ package com.sgolc.graphicsmodel.coordinates;
 public class Rotator implements CoordinateMapper {
 
     private final double angle;
+    private final Point origin;
 
     /**
-     * Applies a rotation to a given coordinate relative to the origin (0,0).
-     * Does not modify coordinate space.
+     * Applies a rotation to a given coordinate relative to the origin.
+     * Origin is (0,0) by default.
      * @param angle Angle of rotation in radians.
      */
     public Rotator(double angle) {
+        this(angle, new Point(0,0));
+    }
+
+    public Rotator(double angle, Point origin) {
         this.angle = angle;
+        this.origin = origin;
     }
 
     @Override
     public Point mapCoordinate(Point coordinate) {
-        if (coordinate.equals(new Point(0,0))) {
+        // normalize input to unit circle
+        Point normalized = coordinate.subtract(origin);
+        // check for null transform
+        if (normalized.equals(new Point(0,0)) || angle == 0) {
             return coordinate;
         }
-        double radius = Math.sqrt(coordinate.x*coordinate.x + coordinate.y*coordinate.y);
+        //find radius (length of hypotenuse)
+        double radius = normalized.distance(0,0);
         double theta;
-        if (coordinate.x == 0) {
-            theta = coordinate.y > 0 ? Math.PI/2 : -Math.PI/2;
+        if (normalized.x == 0) { // angle is vertical
+            theta = normalized.y > 0 ? Math.PI/2 : -Math.PI/2;
         } else {
             theta = Math.acos(
-                    (coordinate.x * coordinate.x + radius * radius - coordinate.y * coordinate.y) /
-                            (2 * coordinate.x * radius));
+                    (normalized.x * normalized.x + radius * radius - normalized.y * normalized.y) /
+                            (2 * normalized.x * radius));
+            theta = normalized.y > 0 ? theta : -theta;
         }
         theta += angle;
-        double beta = Math.PI/2 - theta;
-        double knownRelation = radius / Math.sin(Math.PI/2);
-        return new Point(Math.sin(beta) * knownRelation, Math.sin(theta) * knownRelation);
+        return new Point(origin.x + Math.cos(theta) * radius, origin.y + Math.sin(theta) * radius);
     }
 }
