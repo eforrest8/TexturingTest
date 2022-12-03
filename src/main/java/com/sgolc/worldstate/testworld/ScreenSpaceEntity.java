@@ -3,6 +3,7 @@ package com.sgolc.worldstate.testworld;
 import com.sgolc.graphicsmodel.MappedTexture;
 import com.sgolc.graphicsmodel.coordinates.CoordinateMapper;
 import com.sgolc.graphicsmodel.coordinates.MultiMapper;
+import com.sgolc.graphicsmodel.coordinates.Point;
 import com.sgolc.graphicsmodel.texture.SolidColorTexture;
 import com.sgolc.graphicsmodel.texture.Texture;
 import com.sgolc.worldstate.entitycomponent.Entity;
@@ -52,8 +53,12 @@ public class ScreenSpaceEntity extends Entity {
     }
 
     public void setRotate(double angle) {
+        setRotate(angle, new Point(0,0));
+    }
+
+    public void setRotate(double angle, Point origin) {
         components.remove(rotate);
-        rotate = new RotateComponent(angle);
+        rotate = new RotateComponent(angle, origin);
         components.add(rotate);
     }
 

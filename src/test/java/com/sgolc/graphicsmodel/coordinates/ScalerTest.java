@@ -17,6 +17,9 @@ class ScalerTest {
                 Arguments.of(new Point(1,1), new Point(1,1), new Point(1,1)),
                 Arguments.of(new Point(0,0), new Point(0.5,0.5), new Point(0,0)),
                 Arguments.of(new Point(0.5,0.5), new Point(0.5,0.5), new Point(1,1)),
+                Arguments.of(new Point(0,0), new Point(2,2), new Point(0,0)),
+                Arguments.of(new Point(1,1), new Point(2,2), new Point(0.5,0.5)),
+                Arguments.of(new Point(2,2), new Point(2,2), new Point(1,1)),
                 Arguments.of(new Point(-0.0,-0.0), new Point(-1,-1), new Point(0,0)),
                 Arguments.of(new Point(-1,-1), new Point(-1,-1), new Point(1,1))
         );
@@ -28,4 +31,5 @@ class ScalerTest {
         Scaler mapper = new Scaler(scale.x, scale.y);
         Assertions.assertEquals(expected, mapper.mapCoordinate(input), "Scale was: " + scale);
     }
+
 }

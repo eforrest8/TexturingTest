@@ -25,7 +25,8 @@ public class GraphicsPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        textureRenderer.setOutputDimension(this.getSize());
+        textureRenderer.setOutputDimension(getSize());
+        textureRenderer.setInternalDimension(new Dimension(256,256));
         renderer.update();
         BufferedImage bufferedImage = new BufferedImage(
                 ColorModel.getRGBdefault(),
@@ -33,7 +34,8 @@ public class GraphicsPanel extends JPanel {
                 true,
                 null
         );
-        g.drawImage(bufferedImage, 0, 0, null);
+        Image scaledImage = bufferedImage.getScaledInstance(getWidth(), getHeight(), Image.SCALE_AREA_AVERAGING);
+        g.drawImage(scaledImage, 0, 0, null);
     }
 
 }

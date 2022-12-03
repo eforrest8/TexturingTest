@@ -1,5 +1,6 @@
 package com.sgolc.worldstate.testworld;
 
+import com.sgolc.graphicsmodel.coordinates.Point;
 import com.sgolc.graphicsmodel.texture.TestGradientTexture;
 import com.sgolc.graphicsmodel.texture.Texture;
 import com.sgolc.graphicsmodel.texture.TransparentTexture;
@@ -15,6 +16,6 @@ public class TransparentGradientEntity extends ScreenSpaceEntity {
         setTransparency(alpha);
         setTranslate(0.25, 0.25);
         setScale(0.5, 0.5);
-        setRotate(1);
+        setRotate(1, new Point(0.5,0.5));
     }
 }

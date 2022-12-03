@@ -10,8 +10,14 @@ public class Scaler implements CoordinateMapper {
         this.yScale = yScale;
     }
 
+    public Scaler(double scale) {
+        this(scale, scale);
+    }
+
     @Override
     public Point mapCoordinate(Point coordinate) {
-        return new Point(coordinate.x * xScale, coordinate.y * yScale);
+        return new Point(
+                xScale * coordinate.x,
+                yScale *coordinate.y);
     }
 }

@@ -1,7 +1,6 @@
 package com.sgolc.graphicsmodel;
 
-import com.sgolc.graphicsmodel.coordinates.CoordinateMapper;
-import com.sgolc.graphicsmodel.coordinates.NormalizingCoordinateMapper;
+import com.sgolc.graphicsmodel.coordinates.*;
 import com.sgolc.graphicsmodel.coordinates.Point;
 import com.sgolc.graphicsmodel.texture.Texture;
 
@@ -19,7 +18,9 @@ import java.util.logging.Logger;
 public class TextureRenderer implements Serializable {
 
     private final ExecutorService executor = Executors.newWorkStealingPool();
+    private final int[] bitMasks = {0xFF0000, 0xFF00, 0xFF, 0xFF000000};
     private Dimension outputDimension = new Dimension(1, 1);
+    private Dimension internalDimension = new Dimension(256, 256);
     private Texture screenTexture = null;
     private final Logger renderLogger = Logger.getLogger("com.sgolc.view.TexturingTest.rendering");
 
@@ -30,6 +31,10 @@ public class TextureRenderer implements Serializable {
 
     public void setOutputDimension(Dimension outputDimension) {
         this.outputDimension = outputDimension;
+    }
+
+    public void setInternalDimension(Dimension dimension) {
+        this.internalDimension = dimension;
     }
 
     public void setScreenTexture(Texture screenTexture) {
@@ -43,22 +48,28 @@ public class TextureRenderer implements Serializable {
             throw ex;
         }
         long startTime = System.currentTimeMillis();
-        CoordinateMapper normalizer = new NormalizingCoordinateMapper(outputDimension.width, outputDimension.height);
+        CoordinateMapper normalizer = new NormalizingCoordinateMapper(internalDimension.width, internalDimension.height);
+        AspectRatioCorrector aspectCorrection = new AspectRatioCorrector(internalDimension, outputDimension);
+        CoordinateMapper scaler = new Scaler(1/aspectCorrection.getSmallerFactor());
+        CoordinateMapper prescaleTranslate = new TranslationMapper(-0.5,-0.5);
+        CoordinateMapper postscaleTranslate = new TranslationMapper(0.5,0.5);
         LinkedList<Future<?>> results = new LinkedList<>();
         WritableRaster raster = WritableRaster.createWritableRaster(
                 new SinglePixelPackedSampleModel(
                         DataBuffer.TYPE_INT,
-                        outputDimension.width,
-                        outputDimension.height,
-                        new int[]{0xFF0000, 0xFF00, 0xFF, 0xFF000000}
+                        internalDimension.width,
+                        internalDimension.height,
+                        bitMasks
                 ),
                 null);
-        for (int y = 0; y < outputDimension.height; y++) {
-            for (int x = 0; x < outputDimension.width; x++) {
+        for (int y = 0; y < internalDimension.height; y++) {
+            for (int x = 0; x < internalDimension.width; x++) {
                 int finalX = x;
                 int finalY = y;
                 results.add(executor.submit(() -> {
-                    Color pixel = screenTexture.getColorAtCoordinate(normalizer.mapCoordinate(new Point(finalX, finalY)));
+                    Color pixel = screenTexture.getColorAtCoordinate(
+                            new MultiMapper(normalizer, aspectCorrection, prescaleTranslate, scaler, postscaleTranslate)
+                                    .mapCoordinate(new Point(finalX, finalY)));
                     raster.setPixel(finalX, finalY, new int[]{pixel.getRed(), pixel.getGreen(), pixel.getBlue(), pixel.getAlpha()});
                 }));
             }
