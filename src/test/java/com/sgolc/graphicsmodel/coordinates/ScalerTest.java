@@ -28,7 +28,7 @@ class ScalerTest {
     @ParameterizedTest
     @MethodSource("scaleCases")
     void mapCoordinate(Point expected, Point scale, Point input) {
-        Scaler mapper = new Scaler(scale.x, scale.y);
+        Scaler mapper = new Scaler(scale.getX(), scale.getY());
         Assertions.assertEquals(expected, mapper.mapCoordinate(input), "Scale was: " + scale);
     }
 

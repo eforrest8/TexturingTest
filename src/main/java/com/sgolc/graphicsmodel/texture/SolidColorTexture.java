@@ -14,7 +14,7 @@ public class SolidColorTexture implements Texture {
 
     @Override
     public Color getColorAtCoordinate(Point coordinate) {
-        if (coordinate.x < 0 || coordinate.x > 1 || coordinate.y < 0 || coordinate.y > 1) {
+        if (coordinate.getX() < 0 || coordinate.getX() > 1 || coordinate.getY() < 0 || coordinate.getY() > 1) {
             return new Color(0,0,0,0);
         }
         return color;

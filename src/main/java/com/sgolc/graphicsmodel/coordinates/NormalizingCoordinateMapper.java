@@ -11,6 +11,6 @@ public class NormalizingCoordinateMapper implements CoordinateMapper {
 
     @Override
     public Point mapCoordinate(Point coordinate) {
-        return new Point(coordinate.x/xScale, coordinate.y/yScale);
+        return new Point(coordinate.getX()/xScale, coordinate.getY()/yScale);
     }
 }

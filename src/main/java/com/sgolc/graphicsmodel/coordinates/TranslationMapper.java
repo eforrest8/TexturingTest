@@ -12,6 +12,6 @@ public class TranslationMapper implements CoordinateMapper {
 
     @Override
     public Point mapCoordinate(Point coordinate) {
-        return new Point(coordinate.x + dx, coordinate.y + dy);
+        return new Point(coordinate.getX() + dx, coordinate.getY() + dy);
     }
 }

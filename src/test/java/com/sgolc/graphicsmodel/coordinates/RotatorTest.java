@@ -39,7 +39,7 @@ public class RotatorTest {
     @MethodSource("cases")
     void mapCoordinate(Point expected, double angle, Point input) {
         Point actual = new Rotator(angle).mapCoordinate(input);
-        Assertions.assertTrue(Math.abs(expected.x - actual.x) < EPSILON && Math.abs(expected.y - actual.y) < EPSILON,
+        Assertions.assertTrue(Math.abs(expected.getX() - actual.getX()) < EPSILON && Math.abs(expected.getY() - actual.getY()) < EPSILON,
                 "Expected: " + expected + " but was " + actual + "\nAngle was " + angle + ", input was " + input + "\n");
     }
 
@@ -58,7 +58,7 @@ public class RotatorTest {
     @MethodSource("offsetCases")
     void mapCoordinateWithOffset(Point expected, double angle, Point origin, Point input) {
         Point actual = new Rotator(angle, origin).mapCoordinate(input);
-        Assertions.assertTrue(Math.abs(expected.x - actual.x) < EPSILON && Math.abs(expected.y - actual.y) < EPSILON,
+        Assertions.assertTrue(Math.abs(expected.getX() - actual.getX()) < EPSILON && Math.abs(expected.getY() - actual.getY()) < EPSILON,
                 "Expected: " + expected + " but was " + actual +
                         "\nAngle was " + angle + ", origin was " + origin + " input was " + input + "\n");
     }

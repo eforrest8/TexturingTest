@@ -30,15 +30,15 @@ public class Rotator implements CoordinateMapper {
         //find radius (length of hypotenuse)
         double radius = normalized.distance(0,0);
         double theta;
-        if (normalized.x == 0) { // angle is vertical
-            theta = normalized.y > 0 ? Math.PI/2 : -Math.PI/2;
+        if (normalized.getX() == 0) { // angle is vertical
+            theta = normalized.getY() > 0 ? Math.PI/2 : -Math.PI/2;
         } else {
             theta = Math.acos(
-                    (normalized.x * normalized.x + radius * radius - normalized.y * normalized.y) /
-                            (2 * normalized.x * radius));
-            theta = normalized.y > 0 ? theta : -theta;
+                    (normalized.getX() * normalized.getX() + radius * radius - normalized.getY() * normalized.getY()) /
+                            (2 * normalized.getX() * radius));
+            theta = normalized.getY() > 0 ? theta : -theta;
         }
         theta += angle;
-        return new Point(origin.x + Math.cos(theta) * radius, origin.y + Math.sin(theta) * radius);
+        return new Point(origin.getX() + Math.cos(theta) * radius, origin.getY() + Math.sin(theta) * radius);
     }
 }

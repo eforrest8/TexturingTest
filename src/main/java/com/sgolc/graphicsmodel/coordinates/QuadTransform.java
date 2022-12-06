@@ -1,7 +1,5 @@
 package com.sgolc.graphicsmodel.coordinates;
 
-import com.sgolc.utils.MathUtils;
-
 /**
  * This class represents a 2D quad defined by its corners.
  * It includes a CoordinateMapper to convert calls to its
@@ -36,29 +34,29 @@ public class QuadTransform implements CoordinateMapper {
     public Point mapCoordinate(Point coordinate) {
         // sorry future me for the mathy variable names but this is all i got
 
-        Point q = new Point(coordinate.subtract(points[0]));
-        Point b1 = new Point(points[1].subtract(points[0]));
-        Point b2 = new Point(points[3].subtract(points[0]));
-        Point b3 = new Point(((points[0].subtract(points[1])).subtract(points[3])).add(points[2]));
+        Point q = Point.fromMatrix(coordinate.subtract(points[0]));
+        Point b1 = Point.fromMatrix(points[1].subtract(points[0]));
+        Point b2 = Point.fromMatrix(points[3].subtract(points[0]));
+        Point b3 = Point.fromMatrix(((points[0].subtract(points[1])).subtract(points[3])).add(points[2]));
 
-        float A = MathUtils.wedge(b2, b3);
-        float B = MathUtils.wedge(b3, q) - MathUtils.wedge(b1, b2);
-        float C = MathUtils.wedge(b1, q);
+        double A = Point.wedge(b2, b3);
+        double B = Point.wedge(b3, q) - Point.wedge(b1, b2);
+        double C = Point.wedge(b1, q);
 
         Point uv = new Point();
 
         if (Math.abs(A) < 0.001) {
-            uv.y = -C/B;
+            uv.setY(-C/B);
         } else {
-            float discrim = B*B - 4*A*C;
-            uv.y = (float) (0.5 * (-B - Math.sqrt(discrim)) / A);
+            double discrim = B*B - 4*A*C;
+            uv.setY(0.5 * (-B - Math.sqrt(discrim)) / A);
         }
 
-        Point denom = new Point(b1.add(b3.multiply(uv.y)));
-        if (Math.abs(denom.x) > Math.abs(denom.y)) {
-            uv.x = (q.x - b2.x * uv.y) / denom.x;
+        Point denom = Point.fromMatrix(b1.add(b3.multiply(uv.getY())));
+        if (Math.abs(denom.getX()) > Math.abs(denom.getY())) {
+            uv.setX((q.getX() - b2.getX() * uv.getY()) / denom.getX());
         } else {
-            uv.x = (q.y - b2.y * uv.y) / denom.y;
+            uv.setX((q.getY() - b2.getY() * uv.getY()) / denom.getY());
         }
 
         return uv;

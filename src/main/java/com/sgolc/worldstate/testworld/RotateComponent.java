@@ -6,7 +6,7 @@ import com.sgolc.graphicsmodel.coordinates.Rotator;
 
 public class RotateComponent implements Mapper {
 
-    public double angle;
+    public final double angle;
     public Point origin = new Point(0,0);
 
     public RotateComponent(double angle) {

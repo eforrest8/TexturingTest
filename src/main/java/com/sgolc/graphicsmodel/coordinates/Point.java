@@ -1,85 +1,64 @@
 package com.sgolc.graphicsmodel.coordinates;
 
-import java.awt.geom.Point2D;
-import java.util.Objects;
+import com.sgolc.utils.Matrix;
 
-public class Point extends Point2D {
-
-    public float x;
-    public float y;
+public class Point extends Matrix {
 
     public Point() {
         this(0, 0);
     }
 
-    public Point(float x, float y) {
-        setLocation(x, y);
-    }
-
     public Point(double x, double y) {
-        setLocation(x, y);
+        super(new double[][]{{x}, {y}});
     }
 
     public Point(Point p) {
-        this(p.x, p.y);
+        this(p.getX(), p.getY());
     }
 
-    public Point add(Point p) {
-        return new Point(this.x + p.x, this.y + p.y);
+    public static Point fromMatrix(Matrix m) {
+        if (m.getWidth() != 1 || m.getHeight() != 2) {
+            throw new IllegalArgumentException("Provided matrix does not match required dimensions!");
+        }
+        return new Point(m.getElement(0, 0), m.getElement(1,0));
     }
 
-    public Point subtract(Point p) {
-        return new Point(this.x - p.x, this.y - p.y);
+    public static double wedge(Point a, Point b) {
+        //v.x*w.y - v.y*w.x
+        return a.getX() * b.getY() - a.getY() * b.getX();
     }
 
-    public Point multiply(Point p) {
-        return new Point(this.x * p.x, this.y * p.y);
-    }
-
-    public Point multiply(double s) {
-        return new Point(this.x * s, this.y * s);
-    }
-
-    public Point divide(Point p) {
-        return new Point(this.x / p.x, this.y / p.y);
-    }
-
-    public Point divide(double s) {
-        return this.multiply(1/s);
-    }
-
-    @Override
     public double getX() {
-        return x;
+        return getElement(0,0);
     }
 
-    @Override
     public double getY() {
-        return y;
+        return getElement(1,0);
+    }
+
+    public void setX(double value) {
+        setElement(0,0,value);
+    }
+
+    public void setY(double value) {
+        setElement(1,0,value);
+    }
+
+    public void setLocation(Point p) {
+        setData(new double[][]{{p.getX()}, {p.getY()}});
     }
 
     @Override
-    public void setLocation(double x, double y) {
-        this.x = (float) x;
-        this.y = (float) y;
+    public <T extends Matrix> Point subtract(T m) {
+        return Point.fromMatrix(super.subtract(m));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Point point = (Point) o;
-        return java.lang.Float.compare(point.x, x) == 0 && java.lang.Float.compare(point.y, y) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), x, y);
+    public double distance(double x, double y) {
+        return Math.sqrt(Math.pow(getX() - x, 2) + Math.pow(getY() - y, 2));
     }
 
     @Override
     public String toString() {
-        return "Point(x=" + x + ",y=" + y + ")";
+        return "Point(x=" + getX() + ",y=" + getY() + ")";
     }
 }

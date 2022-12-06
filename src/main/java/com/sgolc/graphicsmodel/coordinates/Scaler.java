@@ -17,7 +17,7 @@ public class Scaler implements CoordinateMapper {
     @Override
     public Point mapCoordinate(Point coordinate) {
         return new Point(
-                xScale * coordinate.x,
-                yScale *coordinate.y);
+                xScale * coordinate.getX(),
+                yScale *coordinate.getY());
     }
 }

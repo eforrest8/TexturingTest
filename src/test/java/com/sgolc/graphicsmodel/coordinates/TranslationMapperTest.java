@@ -20,7 +20,7 @@ class TranslationMapperTest {
     @ParameterizedTest
     @MethodSource("translateCases")
     void mapCoordinate(Point expected, Point delta) {
-        TranslationMapper mapper = new TranslationMapper(delta.x, delta.y);
+        TranslationMapper mapper = new TranslationMapper(delta.getX(), delta.getY());
         Assertions.assertEquals(expected, mapper.mapCoordinate(new Point(0,0)), "Delta was: " + delta);
     }
 }

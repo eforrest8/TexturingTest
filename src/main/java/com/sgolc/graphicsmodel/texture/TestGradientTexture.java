@@ -8,12 +8,12 @@ public class TestGradientTexture implements Texture {
 
     @Override
     public Color getColorAtCoordinate(Point coordinate) {
-        if (coordinate.x < 0 || coordinate.x > 1 || coordinate.y < 0 || coordinate.y > 1) {
+        if (Math.abs(coordinate.getX()) > 0.5 || Math.abs(coordinate.getY()) > 0.5) {
             return new Color(0,0,0,0);
         }
-        float R = coordinate.x;
-        float G = coordinate.y;
-        float B = 1 - (coordinate.x * coordinate.y);
+        float R = (float) coordinate.getX() + 0.5f;
+        float G = (float) coordinate.getY() + 0.5f;
+        float B = (float) (1 - ((coordinate.getX()+0.5) * (coordinate.getY()+0.5)));
         return new Color(R, G, B);
     }
 }

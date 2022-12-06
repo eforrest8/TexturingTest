@@ -11,12 +11,12 @@ import java.util.Objects;
 public class GradientAndCheckerRenderer extends ECSystem {
 
     private final TextureRenderer target;
-    private final CheckerboardEntity checkerboard = new CheckerboardEntity();
-    private final TransparentGradientEntity gradient = new TransparentGradientEntity(0.6);
 
     public GradientAndCheckerRenderer(TextureRenderer target) {
         this.target = target;
+        TransparentGradientEntity gradient = new TransparentGradientEntity(0.6);
         gradient.setzIndex(1);
+        CheckerboardEntity checkerboard = new CheckerboardEntity();
         entities.addAll(List.of(checkerboard, gradient));
     }
 
