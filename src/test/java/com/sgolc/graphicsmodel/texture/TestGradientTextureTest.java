@@ -14,11 +14,11 @@ class TestGradientTextureTest {
 
     private static Stream<Arguments> generalCoordinateCases() {
         return Stream.of(
-                Arguments.of(new Point(0,0), new Color(0,0,255)),
-                Arguments.of(new Point(1,0), new Color(255,0,255)),
-                Arguments.of(new Point(0,1), new Color(0,255,255)),
-                Arguments.of(new Point(1,1), new Color(255,255,0)),
-                Arguments.of(new Point(0.5,0.5), new Color(128,128,191))
+                Arguments.of(new Point(-0.5,-0.5), new Color(0,0,255)),
+                Arguments.of(new Point(0.5,-0.5), new Color(255,0,255)),
+                Arguments.of(new Point(-0.5,0.5), new Color(0,255,255)),
+                Arguments.of(new Point(0.5,0.5), new Color(255,255,0)),
+                Arguments.of(new Point(0,0), new Color(128,128,191))
         );
     }
 
