@@ -1,6 +1,7 @@
 package com.sgolc.view;
 
 import com.sgolc.graphicsmodel.*;
+import com.sgolc.worldstate.entitycomponent.EntityManager;
 import com.sgolc.worldstate.testworld.GradientAndCheckerRenderer;
 
 import javax.swing.*;
@@ -11,7 +12,8 @@ public class GraphicsPanel extends JPanel {
 
     private final static Dimension PREFERRED_SIZE = new Dimension(256, 256);
     private final TextureRenderer textureRenderer = new TextureRenderer();
-    private final GradientAndCheckerRenderer renderer = new GradientAndCheckerRenderer(textureRenderer);
+    private final EntityManager manager = new EntityManager();
+    private final GradientAndCheckerRenderer renderer = new GradientAndCheckerRenderer(textureRenderer, manager);
 
     public GraphicsPanel() {
         super();

@@ -6,19 +6,17 @@ import java.util.*;
  * An Entity is a distinct "thing." It primarily exists for organizational purposes,
  * acting as a container for Components and target for Systems.
  */
-public class Entity implements Comparable<Entity> {
-    public final UUID uuid = UUID.randomUUID();
-    public final Set<Component> components = new HashSet<>();
+public record Entity(int id, Component... components) implements Comparable<Entity> {
 
     @Override
     public int compareTo(Entity o) {
-        return uuid.compareTo(o.uuid);
+        return Integer.compare(id, o.id);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Entity entity) {
-            return uuid.equals(entity.uuid);
+            return id == entity.id;
         } else {
             return false;
         }

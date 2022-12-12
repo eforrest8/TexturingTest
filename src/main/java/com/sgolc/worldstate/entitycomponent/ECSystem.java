@@ -1,14 +1,21 @@
 package com.sgolc.worldstate.entitycomponent;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An ECSystem contains the actions performed on Entities and their Components.
  */
 public abstract class ECSystem {
 
-    public final Set<Entity> entities = new TreeSet<>();
+    private List<Runnable> preUpdateCallbacks = new LinkedList<>();
+    private List<Runnable> postUpdateCallbacks = new LinkedList<>();
+    protected abstract void operation();
 
-    public abstract void update();
+    public void update() {
+        preUpdateCallbacks.forEach(Runnable::run);
+        operation();
+        postUpdateCallbacks.forEach(Runnable::run);
+    }
+
 }

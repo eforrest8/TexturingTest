@@ -1,25 +1,25 @@
 package com.sgolc.worldstate.testworld;
 
 import com.sgolc.graphicsmodel.coordinates.CoordinateMapper;
-import com.sgolc.graphicsmodel.coordinates.Point;
-import com.sgolc.graphicsmodel.coordinates.Rotator;
+import com.sgolc.graphicsmodel.coordinates.LinearTransform;
+import com.sgolc.utils.Matrix;
+import com.sgolc.worldstate.entitycomponent.Component;
 
-public class RotateComponent implements Mapper {
-
-    public final double angle;
-    public Point origin = new Point(0,0);
-
-    public RotateComponent(double angle) {
-        this.angle = angle;
-    }
-
-    public RotateComponent(double angle, Point origin) {
-        this.angle = angle;
-        this.origin = origin;
-    }
+public record RotateComponent(double angle) implements Mapper {
 
     @Override
     public CoordinateMapper getMapper() {
-        return new Rotator(angle, origin);
+        return new LinearTransform(new Matrix(new double[][]{
+                {Math.cos(angle),Math.sin(angle)},
+                {-Math.sin(angle),Math.cos(angle)}
+        }));
+    }
+
+    @Override
+    public int compareTo(Component o) {
+        if (o instanceof RotateComponent r) {
+            return Double.compare(angle(), r.angle());
+        }
+        throw new RuntimeException();
     }
 }

@@ -1,37 +1,71 @@
 package com.sgolc.worldstate.testworld;
 
+import com.sgolc.graphicsmodel.MappedTexture;
 import com.sgolc.graphicsmodel.TextureRenderer;
+import com.sgolc.graphicsmodel.coordinates.CoordinateMapper;
+import com.sgolc.graphicsmodel.coordinates.MultiMapper;
 import com.sgolc.graphicsmodel.texture.CompositingTexture;
 import com.sgolc.graphicsmodel.texture.Texture;
 import com.sgolc.worldstate.entitycomponent.ECSystem;
+import com.sgolc.worldstate.entitycomponent.Entity;
+import com.sgolc.worldstate.entitycomponent.EntityManager;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class GradientAndCheckerRenderer extends ECSystem {
 
-    private final TextureRenderer target;
-
-    public GradientAndCheckerRenderer(TextureRenderer target) {
-        this.target = target;
-        TransparentGradientEntity gradient = new TransparentGradientEntity(0.6);
-        gradient.setzIndex(1);
-        CheckerboardEntity checkerboard = new CheckerboardEntity();
-        entities.addAll(List.of(checkerboard, gradient));
-    }
+    private TextureRenderer target;
+    private EntityManager manager;
+    private static final EntityManager.Query query = new EntityManager.Query(
+            new EntityManager.QueryPart(TextureComponent.class, (a) -> true, EntityManager.ResultMergeMode.OR)
+    );
 
     @Override
-    public void update() {
-        Texture compositor = new CompositingTexture(entities.stream()
-                .map(e -> e instanceof ScreenSpaceEntity sse ? sse : null)
-                .filter(Objects::nonNull)
-                .sorted(this::zIndexComparator)
-                .map(ScreenSpaceEntity::getMappedTexture)
-                .toArray(Texture[]::new));
+    protected void operation() {
+            Texture compositor = new CompositingTexture(manager.computeQuery(query).stream()
+                    .sorted(this::zIndexSort)
+                    .map(this::buildMappedTexture)
+                    .toArray(Texture[]::new));
         target.setScreenTexture(compositor);
+    };
+
+    private int zIndexSort(Entity a, Entity b) {
+        int aIndex = Arrays.stream(a.components())
+                .map(c -> c instanceof ZIndexComponent z ? z : null)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(new ZIndexComponent(0))
+                .zIndex();
+        int bIndex = Arrays.stream(b.components())
+                .map(c -> c instanceof ZIndexComponent z ? z : null)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(new ZIndexComponent(0))
+                .zIndex();
+        return Integer.compare(aIndex, bIndex);
     }
 
-    private int zIndexComparator(ScreenSpaceEntity a, ScreenSpaceEntity b) {
-        return Integer.compare(a.getzIndex(), b.getzIndex());
+    private MappedTexture buildMappedTexture(Entity entity) {
+        TextureComponent tex = Arrays.stream(entity.components())
+                .map(component -> component instanceof TextureComponent t ? t : null)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElseThrow();
+        CoordinateMapper[] maps = Arrays.stream(entity.components())
+                .map(component -> component instanceof Mapper m ? m : null)
+                .filter(Objects::nonNull)
+                .map(Mapper::getMapper)
+                .toArray(CoordinateMapper[]::new);
+        return new MappedTexture(tex.texture(), new MultiMapper(maps));
+    }
+
+    public GradientAndCheckerRenderer(TextureRenderer target, EntityManager manager) {
+        this.target = target;
+        this.manager = manager;
+        Entity gradient = TransparentGradientEntityBuilder.build(manager);
+        Entity check = CheckerboardEntityBuilder.build(manager);
+        manager.addComponentToEntity(gradient, new ZIndexComponent(0));
+        manager.addComponentToEntity(check, new ZIndexComponent(1));
     }
 }
