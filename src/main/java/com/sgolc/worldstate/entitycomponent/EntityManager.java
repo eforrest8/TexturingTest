@@ -15,8 +15,9 @@ public class EntityManager implements Externalizable {
     private static final int serialVersionId = 1;
     private static final int serialMagicNumber = 0x5601C000;
 
-    private final List<List<Component>> entities = new ArrayList<>();
-    private final Map<Class<? extends Component>, NavigableMap<Component, Integer>> indices = new HashMap<>(20);
+    private final Map<Integer, List<Component>> entities = new TreeMap<>();
+    private final Map<Class<? extends Component>, Map<Component, Integer>> indices = new HashMap<>(20);
+    private final Random keyGenerator = new Random();
 
     public EntityManager() {}
 
@@ -30,9 +31,19 @@ public class EntityManager implements Externalizable {
 
     public Entity createEntity(Component... componentList) {
         List<Component> newlist = new LinkedList<>(List.of(componentList));
-        entities.add(newlist);
-        newlist.forEach(c -> updateIndex(entities.size()-1, c));
-        return new Entity(entities.size()-1, componentList);
+        //entities.add(newlist);
+        int key = generateKey();
+        entities.put(key, newlist);
+        newlist.forEach(c -> updateIndex(key, c));
+        return new Entity(key, componentList);
+    }
+
+    private int generateKey() {
+        int possible;
+        do {
+            possible = keyGenerator.nextInt();
+        } while (entities.containsKey(possible));
+        return possible;
     }
 
     private void addComponentToEntity(int id, Component component) {
@@ -103,7 +114,7 @@ public class EntityManager implements Externalizable {
                             newInner.add(component);
                         }
                     }
-                    entities.add(newInner);
+                    entities.put(generateKey(), newInner);
                 }
             }
             rebuildIndices();
@@ -112,11 +123,8 @@ public class EntityManager implements Externalizable {
 
     private void rebuildIndices() {
         indices.clear();
-        Iterator<List<Component>> entityIterator = entities.listIterator();
-        for (int i = 0; entityIterator.hasNext(); i++) {
-            int finalI = i;
-            entityIterator.next().forEach(e -> addComponentToEntity(finalI, e));
-        }
+        Iterator<Map.Entry<Integer, List<Component>>> entityIterator = entities.entrySet().iterator();
+        entityIterator.forEachRemaining(e -> e.getValue().forEach(c -> addComponentToEntity(e.getKey(), c)));
     }
 
     public record Query(QueryPart... parts) {}

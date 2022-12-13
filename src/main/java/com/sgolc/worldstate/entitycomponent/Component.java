@@ -7,7 +7,8 @@ import java.io.Serializable;
  * A "Position" which holds an X/Y/Z coordinate would be a good component, for example.
  */
 public interface Component extends Comparable<Component>, Serializable {
+    @Override
     default int compareTo(Component o) {
-        return 0;
+        return Integer.compare(this.hashCode(), o.hashCode());
     }
 }

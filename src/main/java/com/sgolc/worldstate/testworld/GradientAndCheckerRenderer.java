@@ -11,6 +11,7 @@ import com.sgolc.worldstate.entitycomponent.Entity;
 import com.sgolc.worldstate.entitycomponent.EntityManager;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class GradientAndCheckerRenderer extends ECSystem {
@@ -23,10 +24,11 @@ public class GradientAndCheckerRenderer extends ECSystem {
 
     @Override
     protected void operation() {
-            Texture compositor = new CompositingTexture(manager.computeQuery(query).stream()
-                    .sorted(this::zIndexSort)
-                    .map(this::buildMappedTexture)
-                    .toArray(Texture[]::new));
+        List<Entity> queryResults = manager.computeQuery(query);
+        Texture compositor = new CompositingTexture(queryResults.stream()
+                .sorted(this::zIndexSort)
+                .map(this::buildMappedTexture)
+                .toArray(Texture[]::new));
         target.setScreenTexture(compositor);
     };
 
@@ -65,7 +67,7 @@ public class GradientAndCheckerRenderer extends ECSystem {
         this.manager = manager;
         Entity gradient = TransparentGradientEntityBuilder.build(manager);
         Entity check = CheckerboardEntityBuilder.build(manager);
-        manager.addComponentToEntity(gradient, new ZIndexComponent(0));
-        manager.addComponentToEntity(check, new ZIndexComponent(1));
+        manager.addComponentToEntity(gradient, new ZIndexComponent(1));
+        manager.addComponentToEntity(check, new ZIndexComponent(0));
     }
 }

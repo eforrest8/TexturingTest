@@ -13,7 +13,7 @@ public class TexturingTest {
         //Create and set up the window.
         graphics.setBounds(320, 320, graphics.getWidth(), graphics.getHeight());
         graphics.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        graphics.add(new GraphicsPanel());
+        graphics.add(graphicsPanel);
         //Display the window.
         graphics.pack();
         graphics.setVisible(true);
