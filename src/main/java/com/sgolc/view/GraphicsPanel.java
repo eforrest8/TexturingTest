@@ -2,11 +2,16 @@ package com.sgolc.view;
 
 import com.sgolc.graphicsmodel.*;
 import com.sgolc.worldstate.entitycomponent.EntityManager;
+import com.sgolc.worldstate.testworld.BasicPhysicsSystem;
 import com.sgolc.worldstate.testworld.GradientAndCheckerRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.util.Timer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class GraphicsPanel extends JPanel {
 
@@ -14,9 +19,14 @@ public class GraphicsPanel extends JPanel {
     private final TextureRenderer textureRenderer = new TextureRenderer();
     private final EntityManager manager = new EntityManager();
     private final GradientAndCheckerRenderer renderer = new GradientAndCheckerRenderer(textureRenderer, manager);
+    private final BasicPhysicsSystem physics = new BasicPhysicsSystem(manager);
 
     public GraphicsPanel() {
         super();
+        new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
+                physics::update, 1000, 200, TimeUnit.MILLISECONDS);
+        new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
+                this::repaint, 1000, 100, TimeUnit.MILLISECONDS);
     }
 
     @Override

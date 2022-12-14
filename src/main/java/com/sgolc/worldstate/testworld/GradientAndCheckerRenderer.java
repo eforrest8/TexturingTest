@@ -25,7 +25,7 @@ public class GradientAndCheckerRenderer extends ECSystem {
     @Override
     protected void operation() {
         List<Entity> queryResults = manager.computeQuery(query);
-        Texture compositor = new CompositingTexture(queryResults.stream()
+        Texture compositor = new CompositingTexture(queryResults.stream().parallel()
                 .sorted(this::zIndexSort)
                 .map(this::buildMappedTexture)
                 .toArray(Texture[]::new));
@@ -33,30 +33,18 @@ public class GradientAndCheckerRenderer extends ECSystem {
     };
 
     private int zIndexSort(Entity a, Entity b) {
-        int aIndex = Arrays.stream(a.components())
-                .map(c -> c instanceof ZIndexComponent z ? z : null)
-                .filter(Objects::nonNull)
-                .findAny()
+        int aIndex = a.getComponentByClass(ZIndexComponent.class)
                 .orElse(new ZIndexComponent(0))
                 .zIndex();
-        int bIndex = Arrays.stream(b.components())
-                .map(c -> c instanceof ZIndexComponent z ? z : null)
-                .filter(Objects::nonNull)
-                .findAny()
+        int bIndex = b.getComponentByClass(ZIndexComponent.class)
                 .orElse(new ZIndexComponent(0))
                 .zIndex();
         return Integer.compare(aIndex, bIndex);
     }
 
     private MappedTexture buildMappedTexture(Entity entity) {
-        TextureComponent tex = Arrays.stream(entity.components())
-                .map(component -> component instanceof TextureComponent t ? t : null)
-                .filter(Objects::nonNull)
-                .findAny()
-                .orElseThrow();
-        CoordinateMapper[] maps = Arrays.stream(entity.components())
-                .map(component -> component instanceof Mapper m ? m : null)
-                .filter(Objects::nonNull)
+        TextureComponent tex = entity.getComponentByClass(TextureComponent.class).orElseThrow();
+        CoordinateMapper[] maps = entity.getAllComponentsByClass(Mapper.class)
                 .map(Mapper::getMapper)
                 .toArray(CoordinateMapper[]::new);
         return new MappedTexture(tex.texture(), new MultiMapper(maps));
@@ -68,6 +56,7 @@ public class GradientAndCheckerRenderer extends ECSystem {
         Entity gradient = TransparentGradientEntityBuilder.build(manager);
         Entity check = CheckerboardEntityBuilder.build(manager);
         manager.addComponentToEntity(gradient, new ZIndexComponent(1));
+        manager.addComponentToEntity(gradient, new SpinningComponent(Math.PI/60));
         manager.addComponentToEntity(check, new ZIndexComponent(0));
     }
 }

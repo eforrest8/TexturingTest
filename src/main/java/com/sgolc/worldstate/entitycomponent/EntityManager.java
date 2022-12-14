@@ -4,19 +4,21 @@ import java.io.*;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
  * Manages large collections of entities.
  * Supports querying and transactional updates.
  * Is thread-safe.
+ * Or at least these are the things I want this to be when it's done. :P
  */
 public class EntityManager implements Externalizable {
     private static final int serialVersionId = 1;
     private static final int serialMagicNumber = 0x5601C000;
 
     private final Map<Integer, List<Component>> entities = new TreeMap<>();
-    private final Map<Class<? extends Component>, Map<Component, Integer>> indices = new HashMap<>(20);
+    private final Map<Class<? extends Component>, List<Integer>> indices = new HashMap<>(20);
     private final Random keyGenerator = new Random();
 
     public EntityManager() {}
@@ -25,17 +27,17 @@ public class EntityManager implements Externalizable {
         addComponentToEntity(entity.id(), component);
     }
 
-    public Entity createEntity() {
-        return createEntity(new Component[0]);
+    public void replaceComponent(Entity entity, UnaryOperator<Component> operator) {
+        List<Component> componentList = entities.get(entity.id());
+        componentList.replaceAll(operator);
     }
 
     public Entity createEntity(Component... componentList) {
         List<Component> newlist = new LinkedList<>(List.of(componentList));
-        //entities.add(newlist);
         int key = generateKey();
         entities.put(key, newlist);
         newlist.forEach(c -> updateIndex(key, c));
-        return new Entity(key, componentList);
+        return new Entity(key, this, componentList);
     }
 
     private int generateKey() {
@@ -55,11 +57,11 @@ public class EntityManager implements Externalizable {
         if (!indices.containsKey(component.getClass())) {
             createIndex(component.getClass());
         }
-        indices.get(component.getClass()).put(component, id);
+        indices.get(component.getClass()).add(id);
     }
 
     void createIndex(Class<? extends Component> componentClass) {
-        indices.put(componentClass, new TreeMap<>());
+        indices.put(componentClass, new LinkedList<>());
     }
 
     public List<Entity> computeQuery(Query query) {
@@ -70,20 +72,18 @@ public class EntityManager implements Externalizable {
             currentPart = iterator.next();
             resultIndices = currentPart.mergeMode.merge.apply(resultIndices, computeQueryPart(currentPart));
         }
-        return resultIndices.stream().map(this::getEntityById).toList();
+        return resultIndices.stream().parallel().map(this::getEntityById).toList();
     }
 
     private List<Integer> computeQueryPart(QueryPart part) {
         return indices.get(part.componentClass())
-                .entrySet()
-                .stream()
-                .filter(e -> part.predicate().test(e.getKey()))
-                .map(Map.Entry::getValue)
+                .parallelStream()
+                .filter(e -> entities.get(e).stream().parallel().anyMatch((part)))
                 .toList();
     }
 
     private Entity getEntityById(int id) {
-        return new Entity(id, entities.get(id).toArray(new Component[0]));
+        return new Entity(id, this, entities.get(id).toArray(new Component[0]));
     }
 
     @Override
@@ -132,7 +132,13 @@ public class EntityManager implements Externalizable {
     public record QueryPart(
             Class<? extends Component> componentClass,
             Predicate<Component> predicate,
-            ResultMergeMode mergeMode) {}
+            ResultMergeMode mergeMode) implements Predicate<Component> {
+
+        @Override
+        public boolean test(Component component) {
+            return componentClass.isInstance(component) && predicate().test(component);
+        }
+    }
 
     public enum ResultMergeMode {
         AND((a, b) -> Stream.of(a, b)
