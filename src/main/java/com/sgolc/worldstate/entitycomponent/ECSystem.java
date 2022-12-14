@@ -8,14 +8,14 @@ import java.util.List;
  */
 public abstract class ECSystem {
 
-    private List<Runnable> preUpdateCallbacks = new LinkedList<>();
-    private List<Runnable> postUpdateCallbacks = new LinkedList<>();
+    //private final List<Runnable> preUpdateCallbacks = new LinkedList<>();
+    //private final List<Runnable> postUpdateCallbacks = new LinkedList<>();
     protected abstract void operation();
 
     public void update() {
-        preUpdateCallbacks.forEach(Runnable::run);
+        //preUpdateCallbacks.forEach(Runnable::run);
         operation();
-        postUpdateCallbacks.forEach(Runnable::run);
+        //postUpdateCallbacks.forEach(Runnable::run);
     }
 
 }

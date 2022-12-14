@@ -140,6 +140,7 @@ public class EntityManager implements Externalizable {
         }
     }
 
+    @SuppressWarnings("RedundantTypeArguments")
     public enum ResultMergeMode {
         AND((a, b) -> Stream.of(a, b)
                 .mapMulti(Iterable<Integer>::forEach)

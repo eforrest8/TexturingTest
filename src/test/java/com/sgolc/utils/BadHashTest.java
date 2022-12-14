@@ -16,23 +16,9 @@ import java.util.stream.LongStream;
  */
 class BadHashTest {
 
-    private static List<Long> generateHashes() {
-        List<Long> generated = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
-            generated.add(BadHash.hash(i));
-        }
-        return generated;
-    }
-
     private static LongStream instanceHashStream() {
         BadHash hasher = new BadHash(0);
         return LongStream.generate(hasher::nextLong);
-    }
-
-    @Test
-    void hashFirst100NoSeed() {
-        //System.out.println(generateHashes());
-        Assertions.assertTrue(true);
     }
 
     @Test

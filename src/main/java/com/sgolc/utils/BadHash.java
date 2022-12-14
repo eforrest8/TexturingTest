@@ -24,7 +24,7 @@ public class BadHash implements RandomGenerator.ArbitrarilyJumpableGenerator {
 
     private long step = 0;
     private double stride = 1;
-    private long seed = 0;
+    private long seed;
 
     public BadHash(long seed) {
         this.seed = seed;

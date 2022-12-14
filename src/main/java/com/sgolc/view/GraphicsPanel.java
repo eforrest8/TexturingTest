@@ -8,8 +8,6 @@ import com.sgolc.worldstate.testworld.GradientAndCheckerRenderer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.*;
-import java.util.Timer;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 

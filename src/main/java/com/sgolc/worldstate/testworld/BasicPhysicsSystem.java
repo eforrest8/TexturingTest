@@ -3,8 +3,6 @@ package com.sgolc.worldstate.testworld;
 import com.sgolc.worldstate.entitycomponent.ECSystem;
 import com.sgolc.worldstate.entitycomponent.EntityManager;
 
-import java.util.Arrays;
-
 public class BasicPhysicsSystem extends ECSystem {
 
     private final EntityManager manager;

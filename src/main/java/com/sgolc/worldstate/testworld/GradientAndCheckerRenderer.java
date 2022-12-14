@@ -10,14 +10,12 @@ import com.sgolc.worldstate.entitycomponent.ECSystem;
 import com.sgolc.worldstate.entitycomponent.Entity;
 import com.sgolc.worldstate.entitycomponent.EntityManager;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class GradientAndCheckerRenderer extends ECSystem {
 
-    private TextureRenderer target;
-    private EntityManager manager;
+    private final TextureRenderer target;
+    private final EntityManager manager;
     private static final EntityManager.Query query = new EntityManager.Query(
             new EntityManager.QueryPart(TextureComponent.class, (a) -> true, EntityManager.ResultMergeMode.OR)
     );
@@ -30,7 +28,7 @@ public class GradientAndCheckerRenderer extends ECSystem {
                 .map(this::buildMappedTexture)
                 .toArray(Texture[]::new));
         target.setScreenTexture(compositor);
-    };
+    }
 
     private int zIndexSort(Entity a, Entity b) {
         int aIndex = a.getComponentByClass(ZIndexComponent.class)
