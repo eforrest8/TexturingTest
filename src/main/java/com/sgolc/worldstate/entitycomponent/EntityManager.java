@@ -157,7 +157,7 @@ public class EntityManager implements Externalizable {
                     .filter(e -> Boolean.logicalXor(a.contains(e), b.contains(e)))
                     .toList());
 
-        final BinaryOperator<Collection<Integer>> merge;
+        public final BinaryOperator<Collection<Integer>> merge;
 
         ResultMergeMode(BinaryOperator<Collection<Integer>> func) {
             merge = func;

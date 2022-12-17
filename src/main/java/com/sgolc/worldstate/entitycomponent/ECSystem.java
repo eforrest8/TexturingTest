@@ -8,14 +8,18 @@ import java.util.List;
  */
 public abstract class ECSystem {
 
-    //private final List<Runnable> preUpdateCallbacks = new LinkedList<>();
-    //private final List<Runnable> postUpdateCallbacks = new LinkedList<>();
-    protected abstract void operation();
+    protected final List<Runnable> preUpdateCallbacks = new LinkedList<>();
+    protected final List<Runnable> postUpdateCallbacks = new LinkedList<>();
+    protected List<Entity> queryResult;
 
-    public void update() {
-        //preUpdateCallbacks.forEach(Runnable::run);
-        operation();
-        //postUpdateCallbacks.forEach(Runnable::run);
+    public abstract EntityManager.Query query();
+    public abstract void operation(Entity entity);
+
+    public void update(EntityManager manager) {
+        preUpdateCallbacks.forEach(Runnable::run);
+        queryResult = manager.computeQuery(query());
+        queryResult.forEach(this::operation);
+        postUpdateCallbacks.forEach(Runnable::run);
     }
 
 }

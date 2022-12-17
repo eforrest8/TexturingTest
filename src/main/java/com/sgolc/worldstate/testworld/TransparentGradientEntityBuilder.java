@@ -8,7 +8,6 @@ import com.sgolc.worldstate.entitycomponent.EntityManager;
 
 public class TransparentGradientEntityBuilder {
     private final static Texture GRADIENT_TEXTURE = new TestGradientTexture();
-    private final static double ROTATE = Math.PI / 4;
 
     private TransparentGradientEntityBuilder() {}
 
@@ -16,8 +15,10 @@ public class TransparentGradientEntityBuilder {
         return manager.createEntity(
                 new TextureComponent(new TransparentTexture(GRADIENT_TEXTURE, 0.6f)),
                 new TranslateComponent(0.5, 0.5),
-                new RotateComponent(ROTATE),
-                new ScaleComponent(0.5, 0.5)
+                new ScaleComponent(0.5, 0.5),
+                new ZIndexComponent(1),
+                new RotateComponent(0),
+                new SpinningComponent(Math.PI/120)
         );
     }
 }

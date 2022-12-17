@@ -19,14 +19,16 @@ public class TextureRenderer implements Serializable {
 
     private final ExecutorService executor = Executors.newWorkStealingPool();
     private final int[] bitMasks = {0xFF0000, 0xFF00, 0xFF, 0xFF000000};
+    private final Runnable repaintCallback;
     private Dimension outputDimension = new Dimension(1, 1);
     private Dimension internalDimension = new Dimension(256, 256);
     private Texture screenTexture = null;
     private final Logger renderLogger = Logger.getLogger("com.sgolc.view.TexturingTest.rendering");
 
-    public TextureRenderer() {
+    public TextureRenderer(Runnable repaintCallback) {
         renderLogger.setLevel(Level.WARNING);
         renderLogger.setFilter(e -> e.getMessage() != null);
+        this.repaintCallback = repaintCallback;
     }
 
     public void setOutputDimension(Dimension outputDimension) {
@@ -37,8 +39,9 @@ public class TextureRenderer implements Serializable {
         this.internalDimension = dimension;
     }
 
-    public void setScreenTexture(Texture screenTexture) {
+    public void drawFrame(Texture screenTexture) {
         this.screenTexture = screenTexture;
+        repaintCallback.run();
     }
 
     public WritableRaster render() {
@@ -50,7 +53,7 @@ public class TextureRenderer implements Serializable {
         long startTime = System.currentTimeMillis();
         CoordinateMapper normalizer = new NormalizingCoordinateMapper(internalDimension.width, internalDimension.height);
         AspectRatioCorrector aspectCorrection = new AspectRatioCorrector(internalDimension, outputDimension);
-        CoordinateMapper scaler = new Scaler(1/aspectCorrection.getSmallerFactor());
+        CoordinateMapper scaler = new Scaler(1/aspectCorrection.getLargerFactor());
         CoordinateMapper prescaleTranslate = new TranslationMapper(-0.5,-0.5);
         CoordinateMapper postscaleTranslate = new TranslationMapper(0.5,0.5);
         LinkedList<Future<?>> results = new LinkedList<>();

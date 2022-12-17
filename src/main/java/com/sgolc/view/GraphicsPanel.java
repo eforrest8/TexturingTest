@@ -3,7 +3,8 @@ package com.sgolc.view;
 import com.sgolc.graphicsmodel.*;
 import com.sgolc.worldstate.entitycomponent.EntityManager;
 import com.sgolc.worldstate.testworld.BasicPhysicsSystem;
-import com.sgolc.worldstate.testworld.GradientAndCheckerRenderer;
+import com.sgolc.worldstate.testworld.InitSystem;
+import com.sgolc.worldstate.testworld.TexturedEntityRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,17 +15,19 @@ import java.util.concurrent.TimeUnit;
 public class GraphicsPanel extends JPanel {
 
     private final static Dimension PREFERRED_SIZE = new Dimension(256, 256);
-    private final TextureRenderer textureRenderer = new TextureRenderer();
+    private final TextureRenderer textureRenderer = new TextureRenderer(this::repaint);
     private final EntityManager manager = new EntityManager();
-    private final GradientAndCheckerRenderer renderer = new GradientAndCheckerRenderer(textureRenderer, manager);
-    private final BasicPhysicsSystem physics = new BasicPhysicsSystem(manager);
+    private final TexturedEntityRenderer renderer = new TexturedEntityRenderer(textureRenderer);
+    private final BasicPhysicsSystem physics = new BasicPhysicsSystem();
 
     public GraphicsPanel() {
         super();
+        new InitSystem().update(manager);
+        renderer.update(manager);
         new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
-                physics::update, 1000, 200, TimeUnit.MILLISECONDS);
+                () -> physics.update(manager), 1000, 200, TimeUnit.MILLISECONDS);
         new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
-                this::repaint, 1000, 100, TimeUnit.MILLISECONDS);
+                () -> renderer.update(manager), 1000, 100, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -37,7 +40,6 @@ public class GraphicsPanel extends JPanel {
         super.paintComponent(g);
         textureRenderer.setOutputDimension(getSize());
         textureRenderer.setInternalDimension(new Dimension(256,256));
-        renderer.update();
         BufferedImage bufferedImage = new BufferedImage(
                 ColorModel.getRGBdefault(),
                 textureRenderer.render(),

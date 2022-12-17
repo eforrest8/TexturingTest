@@ -16,6 +16,10 @@ public class AspectRatioCorrector implements CoordinateMapper {
         return Math.min(xScale, yScale);
     }
 
+    public double getLargerFactor() {
+        return Math.max(xScale, yScale);
+    }
+
     @Override
     public Point mapCoordinate(Point coordinate) {
         return new Point(
