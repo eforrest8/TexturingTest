@@ -1,13 +1,15 @@
 package com.sgolc.view;
 
 import com.sgolc.graphicsmodel.*;
-import com.sgolc.worldstate.entitycomponent.EntityManager;
+import com.sgolc.worldstate.entitycomponent.EntityStore;
 import com.sgolc.worldstate.testworld.BasicPhysicsSystem;
 import com.sgolc.worldstate.testworld.InitSystem;
 import com.sgolc.worldstate.testworld.TexturedEntityRenderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.HierarchyBoundsAdapter;
+import java.awt.event.HierarchyEvent;
 import java.awt.image.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -15,19 +17,35 @@ import java.util.concurrent.TimeUnit;
 public class GraphicsPanel extends JPanel {
 
     private final static Dimension PREFERRED_SIZE = new Dimension(256, 256);
-    private final TextureRenderer textureRenderer = new TextureRenderer(this::repaint);
-    private final EntityManager manager = new EntityManager();
-    private final TexturedEntityRenderer renderer = new TexturedEntityRenderer(textureRenderer);
+    private final EntityStore manager = new EntityStore();
+    private final TexturedEntityRenderer renderer = new TexturedEntityRenderer(this::repaint);
     private final BasicPhysicsSystem physics = new BasicPhysicsSystem();
+    private WritableRaster latestFrame;
 
     public GraphicsPanel() {
         super();
-        new InitSystem().update(manager);
-        renderer.update(manager);
+        this.setDoubleBuffered(true);
+        InitSystem init = new InitSystem();
+        init.update(manager);
+        init.setEntityStore(manager);
+        renderer.setEntityStore(manager);
+        physics.setEntityStore(manager);
+        addHierarchyBoundsListener(new HierarchyBoundsAdapter() {
+            @Override
+            public void ancestorResized(HierarchyEvent e) {
+                init.updateOutputDimension(e.getChanged().getSize());
+            }
+        });
+        renderer.update();
         new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
-                () -> physics.update(manager), 1000, 200, TimeUnit.MILLISECONDS);
+                physics::update, 1000, 100, TimeUnit.MILLISECONDS);
         new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(
-                () -> renderer.update(manager), 1000, 100, TimeUnit.MILLISECONDS);
+                renderer::update, 1000, 100, TimeUnit.MILLISECONDS);
+    }
+
+    public void repaint(WritableRaster raster) {
+        latestFrame = raster;
+        repaint();
     }
 
     @Override
@@ -38,11 +56,9 @@ public class GraphicsPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        textureRenderer.setOutputDimension(getSize());
-        textureRenderer.setInternalDimension(new Dimension(256,256));
         BufferedImage bufferedImage = new BufferedImage(
                 ColorModel.getRGBdefault(),
-                textureRenderer.render(),
+                latestFrame,
                 true,
                 null
         );

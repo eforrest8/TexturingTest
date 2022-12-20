@@ -2,22 +2,20 @@ package com.sgolc.worldstate.testworld;
 
 import com.sgolc.worldstate.entitycomponent.ECSystem;
 import com.sgolc.worldstate.entitycomponent.Entity;
-import com.sgolc.worldstate.entitycomponent.EntityManager;
+import com.sgolc.worldstate.entitycomponent.EntityStore;
 
 public class BasicPhysicsSystem extends ECSystem {
 
-    private static final EntityManager.Query rotateQuery = new EntityManager.Query(
-            new EntityManager.QueryPart(SpinningComponent.class, a -> true, EntityManager.ResultMergeMode.OR),
-            new EntityManager.QueryPart(RotateComponent.class, a -> true, EntityManager.ResultMergeMode.AND)
+    private static final EntityStore.Query rotateQuery = new EntityStore.Query(
+            new EntityStore.QueryPart<>(SpinningComponent.class, a -> true, EntityStore.ResultMergeMode.OR),
+            new EntityStore.QueryPart<>(RotateComponent.class, a -> true, EntityStore.ResultMergeMode.AND)
     );
 
-    @Override
-    public EntityManager.Query query() {
-        return rotateQuery;
+    public void update() {
+        query(rotateQuery).forEach(BasicPhysicsSystem::rotateEntity);
     }
 
-    @Override
-    public void operation(Entity entity) {
+    private static void rotateEntity(Entity entity) {
         double dAngle = entity.getComponentByClass(SpinningComponent.class).orElseThrow().rotation();
         entity.replaceComponent(c ->
                 c instanceof RotateComponent

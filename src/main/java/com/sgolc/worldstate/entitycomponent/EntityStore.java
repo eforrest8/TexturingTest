@@ -13,18 +13,23 @@ import java.util.stream.Stream;
  * Is thread-safe.
  * Or at least these are the things I want this to be when it's done. :P
  */
-public class EntityManager implements Externalizable {
+public class EntityStore implements Externalizable {
     private static final int serialVersionId = 1;
     private static final int serialMagicNumber = 0x5601C000;
 
-    private final Map<Integer, List<Component>> entities = new TreeMap<>();
-    private final Map<Class<? extends Component>, List<Integer>> indices = new HashMap<>(20);
+    private final Map<Integer, List<Component>> entities = Collections.synchronizedMap(new TreeMap<>());
+    private final Map<Class<? extends Component>, List<Integer>> indices = Collections.synchronizedMap(new HashMap<>(20));
     private final Random keyGenerator = new Random();
 
-    public EntityManager() {}
+    public EntityStore() {}
 
     public void addComponentToEntity(Entity entity, Component component) {
         addComponentToEntity(entity.id(), component);
+    }
+
+    private void addComponentToEntity(int id, Component component) {
+        entities.get(id).add(component);
+        updateIndex(id, component);
     }
 
     public void replaceComponent(Entity entity, UnaryOperator<Component> operator) {
@@ -48,11 +53,6 @@ public class EntityManager implements Externalizable {
         return possible;
     }
 
-    private void addComponentToEntity(int id, Component component) {
-        entities.get(id).add(component);
-        updateIndex(id, component);
-    }
-
     private void updateIndex(int id, Component component) {
         if (!indices.containsKey(component.getClass())) {
             createIndex(component.getClass());
@@ -60,13 +60,13 @@ public class EntityManager implements Externalizable {
         indices.get(component.getClass()).add(id);
     }
 
-    void createIndex(Class<? extends Component> componentClass) {
+    private void createIndex(Class<? extends Component> componentClass) {
         indices.put(componentClass, new LinkedList<>());
     }
 
     public List<Entity> computeQuery(Query query) {
-        Iterator<QueryPart> iterator = Arrays.stream(query.parts()).iterator();
-        QueryPart currentPart = iterator.next();
+        Iterator<QueryPart<?>> iterator = Arrays.stream(query.parts()).iterator();
+        QueryPart<?> currentPart = iterator.next();
         Collection<Integer> resultIndices = computeQueryPart(currentPart);
         while (iterator.hasNext()) {
             currentPart = iterator.next();
@@ -75,8 +75,8 @@ public class EntityManager implements Externalizable {
         return resultIndices.stream().parallel().map(this::getEntityById).toList();
     }
 
-    private List<Integer> computeQueryPart(QueryPart part) {
-        return indices.get(part.componentClass())
+    private List<Integer> computeQueryPart(QueryPart<?> part) {
+        return indices.getOrDefault(part.componentClass(), List.of())
                 .parallelStream()
                 .filter(e -> entities.get(e).stream().parallel().anyMatch((part)))
                 .toList();
@@ -127,16 +127,17 @@ public class EntityManager implements Externalizable {
         entityIterator.forEachRemaining(e -> e.getValue().forEach(c -> addComponentToEntity(e.getKey(), c)));
     }
 
-    public record Query(QueryPart... parts) {}
+    public record Query(QueryPart<?>... parts) {}
 
-    public record QueryPart(
-            Class<? extends Component> componentClass,
-            Predicate<Component> predicate,
+    public record QueryPart<T extends Component>(
+            Class<T> componentClass,
+            Predicate<T> predicate,
             ResultMergeMode mergeMode) implements Predicate<Component> {
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean test(Component component) {
-            return componentClass.isInstance(component) && predicate().test(component);
+            return componentClass.isInstance(component) && predicate().test((T)component);
         }
     }
 

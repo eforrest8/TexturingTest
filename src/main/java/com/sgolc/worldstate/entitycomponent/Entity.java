@@ -8,7 +8,7 @@ import java.util.stream.Stream;
  * An Entity is a distinct "thing." It primarily exists for organizational purposes,
  * acting as a container for Components and target for Systems.
  */
-public record Entity(int id, EntityManager manager, Component... components) implements Comparable<Entity> {
+public record Entity(int id, EntityStore manager, Component... components) implements Comparable<Entity> {
 
     @SuppressWarnings("unchecked")
     public <A extends Component> Optional<A> getComponentByClass(Class<A> aClass) {
