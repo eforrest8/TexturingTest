@@ -1,4 +1,4 @@
 package com.sgolc.input;
 
-public record Input(InputType type, int id, InputIdentity identity) {
+public record Input(InputType type, InputIdentity identity) {
 }

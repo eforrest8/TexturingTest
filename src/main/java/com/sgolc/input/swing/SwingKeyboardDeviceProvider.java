@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
@@ -30,22 +29,27 @@ public class SwingKeyboardDeviceProvider implements InputDeviceService {
 class SwingKeyboard implements InputDevice {
 
     private final Queue<InputEvent> eventQueue = new LinkedList<>();
+    private final KeyboardFocusManager keyboard;
 
     public SwingKeyboard() {
-        KeyboardFocusManager keyboard = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        keyboard.addKeyEventDispatcher(
-                e -> {
-                    if (e.getID() == KeyEvent.KEY_PRESSED || e.getID() == KeyEvent.KEY_RELEASED) {
-                        eventQueue.offer(new InputEvent(
-                                this,
-                                new Input(InputType.DIGITAL, e.getKeyCode(), InputIdentity.UNKNOWN),
-                                Instant.ofEpochMilli(e.getWhen()),
-                                e.getID() == KeyEvent.KEY_PRESSED ? 1f : 0f
-                        ));
-                    }
-                    return false;
-                }
-        );
+        keyboard = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        keyboard.addKeyEventDispatcher(this::keyEventDispatcher);
+    }
+
+    public void removeListener() {
+        keyboard.removeKeyEventDispatcher(this::keyEventDispatcher);
+    }
+
+    private boolean keyEventDispatcher(KeyEvent e) {
+        if (e.getID() == KeyEvent.KEY_PRESSED || e.getID() == KeyEvent.KEY_RELEASED) {
+            eventQueue.offer(new InputEvent(
+                    this,
+                    new Input(InputType.DIGITAL, () -> "KEYCODE_" + e.getKeyCode()),
+                    Instant.ofEpochMilli(e.getWhen()),
+                    e.getID() == KeyEvent.KEY_PRESSED ? 1f : 0f
+            ));
+        }
+        return false;
     }
 
     @Override
@@ -56,11 +60,6 @@ class SwingKeyboard implements InputDevice {
     @Override
     public InputDeviceForm getForm() {
         return InputDeviceForm.KEYBOARD;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return List.of();
     }
 
     @Override
